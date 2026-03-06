@@ -1,62 +1,67 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from './components/Navigation/Navbar';
 import RouteScrollHandler from './components/RouteScrollHandler';
 import Hero from './components/Hero/Hero';
+import FeatureCards from './components/FeatureCards/FeatureCards';
+import ExpandableCards from './components/ExpandableCards/ExpandableCards';
+import AppScreens from './components/AppScreens/AppScreens';
+import ConnectedProducts from './components/ConnectedProducts/ConnectedProducts';
 import About from './components/About/About';
-import Stats from './components/Stats/Stats';
 import Partners from './components/Partners/Partners';
-import HowItWorks from './components/HowItWorks/HowItWorks';
-import NewsCarousel from './components/News/NewsCarousel';
-import FAQ from './components/FAQ/FAQ';
-import CTA from './components/CTA/CTA';
+import ContactSection from './components/ContactSection/ContactSection';
 import Footer from './components/Footer/Footer';
+import SplashScreen from './components/SplashScreen/SplashScreen';
 
-function HomeContent() {
-  const [shouldRender, setShouldRender] = useState(false);
+export default function Home() {
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    // Always redirect to UserAuth splash screen first (even on reload)
-    // Only show landing page if coming from UserAuth
-    // Use window.location directly to avoid hydration issues
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      const fromUserAuth = params.get('fromUserAuth');
-      
-      if (!fromUserAuth) {
-        // Not coming from UserAuth - redirect to splash screen
-        window.location.href = '/UserAuth';
-        return;
+      if (params.has('fromUserAuth')) {
+        params.delete('fromUserAuth');
+        const cleanSearch = params.toString();
+        const cleanUrl = cleanSearch ? `/?${cleanSearch}` : '/';
+        window.history.replaceState(null, '', cleanUrl);
       }
-      
-      // Coming from UserAuth - safe to render
-      setShouldRender(true);
     }
   }, []);
 
-  // Don't render until we confirm we're coming from UserAuth
-  if (!shouldRender) {
-    return null;
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (showSplash) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showSplash]);
 
   return (
     <>
+      <SplashScreen visible={showSplash} />
       <RouteScrollHandler />
       <Navbar />
       <Hero />
+      <FeatureCards />
+      <ExpandableCards />
       <About />
-      <Stats />
+      <AppScreens />
+      <ConnectedProducts />
+      <ContactSection />
       <Partners />
-      <HowItWorks />
-      <NewsCarousel />
-      <FAQ />
-      <CTA />
       <Footer />
     </>
   );
 }
 
-export default function Home() {
-  return <HomeContent />;
-}

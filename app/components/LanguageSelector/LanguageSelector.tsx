@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 
 interface Language {
@@ -11,7 +11,7 @@ interface Language {
 }
 
 const languages: Language[] = [
-  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇳🇬' },
   { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
   { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
@@ -64,21 +64,13 @@ const languages: Language[] = [
 ];
 
 export default function LanguageSelector() {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, regionFlag, setRegionFlag, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const currentLang = languages.find(l => l.code === language) || languages[0];
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedLang = localStorage.getItem('selectedLanguage');
-      if (savedLang) {
-        setLanguage(savedLang);
-      }
-    }
-  }, [setLanguage]);
-
   const handleLanguageSelect = (lang: Language) => {
     setLanguage(lang.code);
+    setRegionFlag(lang.flag);
     if (typeof window !== 'undefined') {
       localStorage.setItem('selectedLanguage', lang.code);
     }
@@ -92,11 +84,7 @@ export default function LanguageSelector() {
         className="lang-btn"
         aria-label="Select language"
       >
-        {currentLang.code === 'en' ? (
-          <span className="material-icons">language</span>
-        ) : (
-          <span className="lang-btn-flag">{currentLang.flag}</span>
-        )}
+        <span className="lang-btn-flag">{regionFlag}</span>
       </button>
 
       <div className={`lang-modal ${isOpen ? 'active' : ''}`} onClick={() => setIsOpen(false)}>

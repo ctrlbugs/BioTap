@@ -295,7 +295,7 @@ class EmailService {
     });
     
     const mailOptions = {
-      from: `"Sinergia Negotium" <${fromAddress}>`, // Use name and email format
+      from: `"BioTap" <${fromAddress}>`, // Use name and email format
       to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
       subject: options.subject,
       html: options.html,
@@ -306,9 +306,9 @@ class EmailService {
       priority: options.priority || 'normal',
       headers: {
         'X-Priority': options.priority === 'high' ? '1' : options.priority === 'low' ? '5' : '3',
-        'X-Mailer': 'Sinergia Negotium Email Service',
+        'X-Mailer': 'BioTap Email Service',
         'X-Tags': options.tags?.join(', ') || '',
-        'Message-ID': `<${Date.now()}-${Math.random().toString(36)}@sinergianegotium.com>`,
+        'Message-ID': `<${Date.now()}-${Math.random().toString(36)}@biotapapp.com>`,
       },
     };
 

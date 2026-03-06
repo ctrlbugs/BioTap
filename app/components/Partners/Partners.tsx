@@ -5,15 +5,16 @@ import Image from 'next/image';
 
 // Logos from images/Partners
 const partnerLogos = [
-  { src: '/images/Partners/Aradel.png', alt: 'Aradel' },
-  { src: '/images/Partners/Chevron.png', alt: 'Chevron' },
-  { src: '/images/Partners/exxon.png', alt: 'Exxon' },
-  { src: '/images/Partners/Heir.png', alt: 'Heir' },
-  { src: '/images/Partners/Mrs.png', alt: 'Mrs' },
-  { src: '/images/Partners/oando.png', alt: 'Oando' },
-  { src: '/images/Partners/Oiltest.png', alt: 'Oiltest' },
-  { src: '/images/Partners/Petrolex.png', alt: 'Petrolex' },
-  { src: '/images/Partners/seplat.png', alt: 'Seplat' },
+  { src: '/images/Partners/thewrker.png', alt: 'Thewrker' },
+  { src: '/images/Partners/ctrlbugs.png', alt: 'ctrlbugs' },
+  { src: '/images/Partners/ctrlgadgets.png', alt: 'ctrlgadgets' },
+  { src: '/images/Partners/HOB.png', alt: 'HOB' },
+  { src: '/images/Partners/Localwaka.png', alt: 'Localwaka' },
+  { src: '/images/Partners/Mono.png', alt: 'Mono' },
+  { src: '/images/Partners/NDPC.png', alt: 'NDPC' },
+  { src: '/images/Partners/nitda.png', alt: 'NITDA' },
+  { src: '/images/Partners/Paystack.png', alt: 'Paystack' },
+  { src: '/images/Partners/sinergia.png', alt: 'Sinergia' },
 ];
 
 export default function Partners() {
@@ -159,7 +160,10 @@ export default function Partners() {
             >
               <div className="partners-carousel-track" ref={trackRef}>
                 {partnerLogos.map((logo, index) => (
-                  <div key={`original-${index}`} className="partners-logo-item">
+                  <div
+                    key={`original-${index}`}
+                    className={`partners-logo-item ${logo.alt === 'Thewrker' ? 'partners-logo-item--wide' : ''}`}
+                  >
                     <Image
                       src={logo.src}
                       alt={logo.alt}
@@ -173,7 +177,10 @@ export default function Partners() {
               </div>
               <div className="partners-carousel-track duplicate" ref={duplicateRef}>
                 {partnerLogos.map((logo, index) => (
-                  <div key={`duplicate-${index}`} className="partners-logo-item">
+                  <div
+                    key={`duplicate-${index}`}
+                    className={`partners-logo-item ${logo.alt === 'Thewrker' ? 'partners-logo-item--wide' : ''}`}
+                  >
                     <Image
                       src={logo.src}
                       alt={logo.alt}

@@ -9,7 +9,6 @@ export default function RouteScrollHandler() {
   useEffect(() => {
     // Map routes to section IDs
     const routeToSectionMap: { [key: string]: string } = {
-      '/': 'hero',
       '/about': 'about',
       '/faq': 'faq',
       '/contact': 'contact',
@@ -25,8 +24,8 @@ export default function RouteScrollHandler() {
         }
       }, 100);
     } else if (pathname === '/') {
-      // Scroll to top when on home
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to top when on home so sticky header doesn't clip the hero
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   }, [pathname]);
 

@@ -3,196 +3,223 @@
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/app/contexts/LanguageContext';
-import { useContactModal } from '@/app/components/ContactModal/ContactModal';
 
-export default function Hero() {
-  const { t, language } = useLanguage();
-  const { openModal: openContactModal } = useContactModal();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
-  const heroSectionRef = useRef<HTMLElement>(null);
-  const titleRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const subtitleRefs = useRef<(HTMLParagraphElement | null)[]>([]);
-  const badgeRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const flipIndexRef = useRef<number>(0);
+const FLIP_ITEMS = [
+  { captionKey: 'hero.flip.caption1', mainKey: 'hero.flip.main1', highlightWord: 'biometric' },
+  { captionKey: 'hero.flip.caption2', mainKey: 'hero.flip.main2', highlightWord: 'frictionless' },
+  { captionKey: 'hero.flip.caption3', mainKey: 'hero.flip.main3', highlightWord: 'gesture' },
+];
 
-  const [heroImageIndex, setHeroImageIndex] = useState(0);
-  const heroImages = ['/images/Hero11.png', '/images/Hero22.png'];
+const HERO_IMAGES = [
+  { src: '/images/Merchant.png', alt: 'BioTap merchant' },
+  { src: '/images/holdphone.png', alt: 'BioTap app mockup' },
+];
 
-  const [heroBadges, setHeroBadges] = useState([
-    t('hero.badge.crypto'),
-    t('hero.badge.stock'),
-  ]);
+function renderMainWithHighlight(text: string, highlightWord: string) {
+  if (!highlightWord || !text.includes(highlightWord)) {
+    return text;
+  }
+  const parts = text.split(highlightWord);
+  return (
+    <>
+      {parts[0]}
+      <span className="hero-flip-highlight">{highlightWord}</span>
+      {parts.slice(1).join(highlightWord)}
+    </>
+  );
+}
 
-  const [heroTitles, setHeroTitles] = useState([
-    t('hero.title1'),
-    t('hero.title2'),
-    t('hero.title3'),
-    t('hero.title4'),
-  ]);
-
-  const [heroSubtitles, setHeroSubtitles] = useState([
-    t('hero.subtitle1'),
-    t('hero.subtitle2'),
-    t('hero.subtitle3'),
-    t('hero.subtitle4'),
-  ]);
-
-  // Update titles, subtitles, and badges when language changes
-  useEffect(() => {
-    setHeroBadges([t('hero.badge.crypto'), t('hero.badge.stock')]);
-    setHeroTitles([t('hero.title1'), t('hero.title2'), t('hero.title3'), t('hero.title4')]);
-    setHeroSubtitles([t('hero.subtitle1'), t('hero.subtitle2'), t('hero.subtitle3'), t('hero.subtitle4')]);
-  }, [language, t]);
-
-  // Rotate badge every 30 seconds
-  useEffect(() => {
-    badgeRefs.current[0]?.classList.add('active');
-    const badgeInterval = setInterval(() => {
-      setCurrentBadgeIndex((prev) => {
-        badgeRefs.current[prev]?.classList.remove('active');
-        const next = (prev + 1) % heroBadges.length;
-        setTimeout(() => {
-          badgeRefs.current[next]?.classList.add('active');
-        }, 0);
-        return next;
-      });
-    }, 30000);
-    return () => clearInterval(badgeInterval);
-  }, [heroBadges.length]);
-
-  // Rotate title/subtitle pairs: flip through all 3 options ONCE, then stop at the last one
-  useEffect(() => {
-    let flipInterval: NodeJS.Timeout | null = null;
-    flipIndexRef.current = 0;
-
-    titleRefs.current[0]?.classList.add('active');
-    subtitleRefs.current[0]?.classList.add('active');
-    setCurrentIndex(0);
-
-    const flipToNext = () => {
-      const currentIdx = flipIndexRef.current;
-      if (currentIdx >= heroTitles.length - 1) {
-        if (flipInterval) {
-          clearInterval(flipInterval);
-          flipInterval = null;
-        }
-        return;
-      }
-
-      const nextIdx = currentIdx + 1;
-      titleRefs.current[currentIdx]?.classList.remove('active');
-      subtitleRefs.current[currentIdx]?.classList.remove('active');
-      flipIndexRef.current = nextIdx;
-      setCurrentIndex(nextIdx);
-
-      setTimeout(() => {
-        titleRefs.current[nextIdx]?.classList.add('active');
-        subtitleRefs.current[nextIdx]?.classList.add('active');
-      }, 100);
-    };
-
-    const startDelay = setTimeout(() => {
-      flipInterval = setInterval(flipToNext, 4000);
-    }, 1000);
-
-    return () => {
-      if (startDelay) clearTimeout(startDelay);
-      if (flipInterval) clearInterval(flipInterval);
-    };
-  }, [heroTitles.length]);
-
-  // Smooth image crossfade - switch every 10 seconds
-  useEffect(() => {
-    const imageInterval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 10000);
-    return () => clearInterval(imageInterval);
-  }, [heroImages.length]);
+function renderMobileHeroMainText(mainKey: string) {
+  if (mainKey !== 'hero.flip.main3') return null;
 
   return (
-    <section ref={heroSectionRef} className="hero" id="hero">
-      <div className="hero-container">
-        <div className="hero-content fade-in">
-          <div className="section-badge hero-badge-rotating">
-            <span className="hero-badge-sizer" aria-hidden="true">
-              {heroBadges.reduce((a, b) => (a.length >= b.length ? a : b))}
-            </span>
-            {heroBadges.map((badge, index) => (
-              <span
-                key={index}
-                ref={(el) => {
-                  badgeRefs.current[index] = el;
-                }}
-                className={`hero-badge-text ${index === currentBadgeIndex ? 'active' : ''}`}
-                data-badge={index}
-              >
-                {badge}
-              </span>
-            ))}
-          </div>
-          <h1 className="hero-title">
-            <span className="hero-title-rotating">
-              {heroTitles.map((title, index) => (
+    <>
+      One Secure Tap <span className="hero-flip-highlight-black">Instant</span> Access{'\n'}Anywhere
+    </>
+  );
+}
+
+export default function Hero() {
+  const { t } = useLanguage();
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [flipIndex, setFlipIndex] = useState(0);
+  const [hasCompletedCycle, setHasCompletedCycle] = useState(false);
+  const [isInView, setIsInView] = useState(true);
+  const [imageIndex, setImageIndex] = useState(0);
+  const [hasCompletedImageCycle, setHasCompletedImageCycle] = useState(false);
+  const wasInViewRef = useRef(true);
+
+  useEffect(() => {
+    const updateIsMobile = () => setIsMobile(window.innerWidth <= 768);
+    updateIsMobile();
+    window.addEventListener('resize', updateIsMobile);
+    return () => window.removeEventListener('resize', updateIsMobile);
+  }, []);
+
+  // Reset flip when user leaves section and comes back
+  useEffect(() => {
+    const el = heroSectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const nowInView = entry.isIntersecting;
+          if (nowInView && !wasInViewRef.current) {
+            setFlipIndex(0);
+            setHasCompletedCycle(false);
+            setImageIndex(0);
+            setHasCompletedImageCycle(false);
+          }
+          wasInViewRef.current = nowInView;
+          setIsInView(nowInView);
+        });
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Flip through items - stop after last one
+  useEffect(() => {
+    if (hasCompletedCycle || !isInView) return;
+    const timer = setTimeout(() => {
+      if (flipIndex >= FLIP_ITEMS.length - 1) {
+        setHasCompletedCycle(true);
+      } else {
+        setFlipIndex((prev) => prev + 1);
+      }
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [flipIndex, hasCompletedCycle, isInView]);
+
+  // Switch hero image: Merchant -> holdphone -> back to Merchant (then stop)
+  useEffect(() => {
+    if (!isInView || hasCompletedImageCycle) return;
+    const timer = setTimeout(() => {
+      setImageIndex((prev) => {
+        if (prev === 0) return 1;
+        setHasCompletedImageCycle(true);
+        return 0;
+      });
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [imageIndex, isInView, hasCompletedImageCycle]);
+
+  // Show scroll line only while user is actively scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 150);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
+
+  const scrollToExplore = () => {
+    const aboutSection = document.getElementById('about');
+    if (aboutSection) {
+      aboutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const getHeroMainText = (mainKey: string) => {
+    if (isMobile && mainKey === 'hero.flip.main3') {
+      return 'One Secure Tap. Instant Authentication.';
+    }
+    return t(mainKey);
+  };
+
+  return (
+    <section ref={heroSectionRef} className="hero hero-redesign" id="hero">
+      <div className="hero-container hero-container-redesign">
+        {/* Left - Flip text */}
+        <div className="hero-content hero-content-left fade-in">
+          <div className="hero-flip-container">
+            <p className="hero-flip-caption">
+              {FLIP_ITEMS.map((item, idx) => (
                 <span
-                  key={index}
-                  ref={(el) => {
-                    titleRefs.current[index] = el;
-                  }}
-                  className={`hero-title-text ${index === currentIndex ? 'active' : ''}`}
-                  data-title={index}
+                  key={item.captionKey}
+                  className={`hero-flip-caption-text ${idx === flipIndex ? 'active' : ''}`}
                 >
-                  {title}
+                  {t(item.captionKey)}
                 </span>
               ))}
-            </span>
-          </h1>
-          <div className="hero-subtitle-rotating">
-            {heroSubtitles.map((subtitle, index) => (
-              <p
-                key={index}
-                ref={(el) => {
-                  subtitleRefs.current[index] = el;
-                }}
-                className={`hero-subtitle-text ${index === currentIndex ? 'active' : ''}`}
-                data-subtitle={index}
-              >
-                {subtitle}
-              </p>
-            ))}
+            </p>
+            <h1 className="hero-title hero-title-redesign hero-title-flip">
+              {FLIP_ITEMS.map((item, idx) => (
+                <span
+                  key={item.mainKey}
+                  className={`hero-flip-title ${idx === flipIndex ? 'active' : ''}`}
+                >
+                  {isMobile && item.mainKey === 'hero.flip.main3'
+                    ? renderMobileHeroMainText(item.mainKey)
+                    : renderMainWithHighlight(getHeroMainText(item.mainKey), item.highlightWord)}
+                </span>
+              ))}
+            </h1>
           </div>
-          <div className="hero-cta-form">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={(e) => {
-                e.preventDefault();
-                openContactModal();
-              }}
-            >
-              {t('hero.cta')}
-            </button>
+          <div className={`hero-scroll-explore ${isScrolling ? 'scrolling' : ''}`} onClick={scrollToExplore} onKeyDown={(e) => e.key === 'Enter' && scrollToExplore()} role="button" tabIndex={0}>
+            <div className="hero-scroll-track" aria-hidden>
+              <span className="hero-scroll-line-active" />
+              <span className="hero-scroll-line-inactive" />
+              <span className="hero-scroll-line-inactive" />
+            </div>
+            <span className="hero-scroll-text">{t('hero.scrollExplore')}</span>
           </div>
         </div>
-        <div className="hero-visual fade-in">
-          <div className="hero-image-container hero-image-stack">
-            {heroImages.map((src, index) => (
+
+        {/* Center - Mockup image */}
+        <div className="hero-visual hero-visual-center fade-in">
+          <div className="hero-image-container hero-image-stack hero-mockup-stack">
+            {HERO_IMAGES.map((img, idx) => (
               <Image
-                key={src}
-                src={src}
-                alt="SINERGIA NEGOTIUM"
-                width={500}
-                height={500}
+                key={img.src}
+                src={img.src}
+                alt={img.alt}
+                width={560}
+                height={840}
                 quality={100}
                 unoptimized
-                className={`hero-image hero-image-slide ${index === heroImageIndex ? 'active' : ''}`}
-                priority={index === 0}
+                className={`hero-image hero-mockup-img hero-image-slide ${img.src.includes('holdphone') ? 'hero-mockup-img--holdphone' : ''} ${img.src.includes('Merchant') ? 'hero-mockup-img--merchant' : ''} ${idx === imageIndex ? 'active' : ''}`}
+                priority={idx === 0}
               />
             ))}
+          </div>
+        </div>
+
+        {/* Right - Stats and download */}
+        <div className="hero-content hero-content-right fade-in">
+          <div className="hero-stats-row">
+            <div className="hero-stat-item">
+              <span className="hero-stat-label">{t('hero.activeUsersLabel')}</span>
+              <span className="hero-stat-number">{t('hero.activeUsersNumber')}</span>
+            </div>
+            <div className="hero-stat-item">
+              <span className="hero-stat-label">{t('hero.downloadLabel')}</span>
+              <span className="hero-stat-number">{t('hero.downloadNumber')}</span>
+            </div>
+          </div>
+          <p className="hero-placeholder-text">{t('hero.downloadPlaceholder')}</p>
+          <p className="hero-download-label">{t('hero.downloadNowOn')}</p>
+          <div className="hero-store-buttons">
+            <a href="#" className="hero-store-btn" aria-label="Download on App Store">
+              <Image src="/images/Appstore.png" alt="App Store" width={160} height={48} unoptimized />
+            </a>
+            <a href="#" className="hero-store-btn" aria-label="Get it on Google Play">
+              <Image src="/images/Googleplay.png" alt="Google Play" width={160} height={48} unoptimized />
+            </a>
           </div>
         </div>
       </div>
     </section>
   );
 }
-

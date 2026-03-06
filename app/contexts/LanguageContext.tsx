@@ -1,23 +1,40 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { detectUserRegion, LANG_TO_FLAG } from '@/app/lib/regionConfig';
 
 interface LanguageContextType {
   language: string;
   setLanguage: (lang: string) => void;
+  regionFlag: string;
+  setRegionFlag: (flag: string) => void;
   t: (key: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const SUPPORTED_LANGS = ['en', 'es', 'fr', 'de', 'zh', 'hi', 'pt', 'ru', 'ja'];
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<string>('en');
+  const [regionFlag, setRegionFlagState] = useState<string>('🇳🇬');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+    if (typeof window === 'undefined') return;
+    const savedLang = localStorage.getItem('selectedLanguage');
+    if (savedLang && SUPPORTED_LANGS.includes(savedLang)) {
       setLanguageState(savedLang);
+      setRegionFlagState(LANG_TO_FLAG[savedLang] ?? '🇳🇬');
+      return;
     }
+    // No saved preference: detect region, set flag, and auto-translate for non-English regions
+    detectUserRegion().then((region) => {
+      setRegionFlagState(region.flag);
+      if (SUPPORTED_LANGS.includes(region.langCode)) {
+        setLanguageState(region.langCode);
+        localStorage.setItem('selectedLanguage', region.langCode);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -47,7 +64,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, regionFlag, setRegionFlag: setRegionFlagState, t }}>
       {children}
     </LanguageContext.Provider>
   );

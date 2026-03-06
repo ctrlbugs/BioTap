@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { useContactModal } from '@/app/components/ContactModal/ContactModal';
@@ -10,10 +10,70 @@ import { useContactModal } from '@/app/components/ContactModal/ContactModal';
 // Bump this version when you change logo.png to bypass cache
 const LOGO_VERSION = 3;
 
+const PRODUCT_MENU_GROUPS = [
+  {
+    title: 'Payments',
+    accentClass: 'is-payments',
+    items: [
+      { label: 'Instant Payments', description: 'Fast confirmed biometric payments.', sectionId: 'expandable-cards' },
+      { label: 'Remote Payments', description: 'Receive payments anytime, anywhere.', sectionId: 'expandable-cards' },
+      { label: 'Tap to Pay', description: 'Secure tap checkout for merchants.', sectionId: 'expandable-cards' },
+      { label: 'Cardless Payments', description: 'No cards or cash required.', sectionId: 'expandable-cards' },
+    ],
+  },
+  {
+    title: 'Connected Products',
+    accentClass: 'is-products',
+    items: [
+      { label: 'Point of Sale', description: 'Accept payments with BioTap POS.', sectionId: 'connected-products' },
+      { label: 'Offline Payment', description: 'Keep selling even without internet.', sectionId: 'connected-products' },
+      { label: 'Inventory Management', description: 'Track stock and daily sales.', sectionId: 'connected-products' },
+      { label: 'Contact Sales', description: 'Talk to our team about deployment.', sectionId: 'contact' },
+    ],
+  },
+  {
+    title: 'Identity & Access',
+    accentClass: 'is-identity',
+    items: [
+      { label: 'Biometric Login', description: 'One-touch authentication and access.', sectionId: 'app-screens' },
+      { label: 'Merchant Network', description: 'Connect users, merchants, and banks.', sectionId: 'about' },
+      { label: 'Security & Privacy', description: 'Built around trust and compliance.', sectionId: 'about' },
+      { label: 'About BioTap', description: 'Learn more about our mission.', sectionId: 'about' },
+    ],
+  },
+] as const;
+
 export default function Navbar() {
   const { t } = useLanguage();
   const { openModal: openContactModal } = useContactModal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [productDropdownOpen, setProductDropdownOpen] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const dropdownRef = useRef<HTMLLIElement>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 150);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setProductDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, sectionId: string) => {
     e.preventDefault();
@@ -24,6 +84,7 @@ export default function Navbar() {
     }
     window.history.pushState(null, '', href);
     setMobileMenuOpen(false);
+    setProductDropdownOpen(false);
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -33,64 +94,129 @@ export default function Navbar() {
     }
   };
 
+  const handleProductMenuClick = (sectionId: string) => {
+    if (sectionId === 'contact') {
+      openContactModal();
+    } else {
+      scrollToSection(sectionId);
+    }
+    window.history.pushState(null, '', '/');
+    setProductDropdownOpen(false);
+    setMobileMenuOpen(false);
+  };
+
   const navLinks = [
-    { href: '/', label: t('nav.home'), sectionId: 'hero' },
-    { href: '/about', label: t('nav.about'), sectionId: 'about' },
-    { href: '/faq', label: t('nav.faq'), sectionId: 'faq' },
+    { href: '/', label: t('nav.solution'), sectionId: 'expandable-cards' },
+    { href: '/', label: t('nav.company'), sectionId: 'company' },
     { href: '/contact', label: t('nav.contact'), sectionId: 'contact' },
   ];
 
   return (
     <>
-      <nav className="navbar">
+      <nav className={`navbar ${isScrolling ? 'navbar-scrolled' : ''}`}>
         <div className="nav-container">
           {/* Logo */}
           <Link href="/" className="logo" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); window.history.pushState(null, '', '/'); }}>
             <Image
               src={`/images/logo.png?v=${LOGO_VERSION}`}
-              alt="SINERGIA NEGOTIUM"
+              alt="BioTap"
               width={36}
               height={36}
               priority
               unoptimized
             />
-            <span className="logo-text">SINERGIA NEGOTIUM</span>
+            <span className="logo-text">BioTap</span>
           </Link>
 
           {/* Desktop Navigation */}
           <ul className="nav-links">
+            <li className="nav-dropdown-wrapper" ref={dropdownRef}>
+              <button
+                type="button"
+                className="nav-dropdown-trigger"
+                onClick={() => setProductDropdownOpen(!productDropdownOpen)}
+                aria-expanded={productDropdownOpen}
+                aria-haspopup="true"
+              >
+                {t('nav.product')}
+                <span className={`nav-dropdown-arrow ${productDropdownOpen ? 'open' : ''}`} aria-hidden>▾</span>
+              </button>
+              <div className={`nav-dropdown-menu nav-mega-menu ${productDropdownOpen ? 'open' : ''}`} role="menu">
+                <div className="nav-mega-menu-intro">
+                  <h3 className="nav-mega-menu-title">Products</h3>
+                  <p className="nav-mega-menu-copy">
+                    Explore BioTap products built for seamless biometric payments, merchant operations, and secure
+                    identity-based access.
+                  </p>
+                  <button
+                    type="button"
+                    className="nav-mega-menu-link"
+                    onClick={() => handleProductMenuClick('expandable-cards')}
+                  >
+                    See products
+                    <span className="material-icons" aria-hidden>
+                      arrow_forward
+                    </span>
+                  </button>
+                </div>
+                <div className="nav-mega-menu-groups">
+                  {PRODUCT_MENU_GROUPS.map((group) => (
+                    <div key={group.title} className="nav-mega-menu-group">
+                      <div className={`nav-mega-menu-group-title ${group.accentClass}`}>
+                        <span className="nav-mega-menu-group-dot" aria-hidden />
+                        {group.title}
+                      </div>
+                      <div className="nav-mega-menu-items">
+                        {group.items.map((item) => (
+                          <button
+                            key={item.label}
+                            type="button"
+                            className="nav-mega-menu-item"
+                            onClick={() => handleProductMenuClick(item.sectionId)}
+                          >
+                            <span className="nav-mega-menu-item-label">
+                              {item.label}
+                              <span className="material-icons nav-mega-menu-item-icon" aria-hidden>
+                                chevron_right
+                              </span>
+                            </span>
+                            <span className="nav-mega-menu-item-description">{item.description}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </li>
             {navLinks.map((link) => (
-              <li key={link.href}>
+              <li key={link.sectionId}>
                 <a href={link.href} onClick={(e) => handleNavClick(e, link.href, link.sectionId)}>{link.label}</a>
               </li>
             ))}
           </ul>
 
-          {/* Desktop Actions: Search + Language */}
+          {/* Desktop Actions: Get Started + Language */}
           <div className="nav-actions">
-            <div className="nav-search-wrapper">
-              <input
-                type="search"
-                className="nav-search-input"
-                placeholder={t('nav.search')}
-                aria-label="Search"
-              />
-              <span className="nav-search-icon" aria-hidden>⌕</span>
-            </div>
+            <button
+              type="button"
+              className="btn btn-primary nav-get-started"
+              onClick={() => openContactModal()}
+            >
+              {t('hero.cta')}
+            </button>
             <LanguageSelector />
           </div>
 
-          {/* Mobile Actions: Search + Language + Burger */}
+          {/* Mobile Actions: Get Started + Language + Burger */}
           <div className="nav-actions-mobile">
-            <div className="nav-search-wrapper nav-search-mobile">
-              <input
-                type="search"
-                className="nav-search-input"
-                placeholder={t('nav.search')}
-                aria-label="Search"
-              />
-              <span className="nav-search-icon" aria-hidden>⌕</span>
-            </div>
+            <button
+              type="button"
+              className="btn btn-primary nav-get-started"
+              onClick={() => openContactModal()}
+            >
+              {t('hero.cta')}
+            </button>
             <LanguageSelector />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -115,12 +241,12 @@ export default function Navbar() {
           <Link href="/" className="mobile-sidebar-logo" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); window.history.pushState(null, '', '/'); }}>
             <Image
               src={`/images/logo.png?v=${LOGO_VERSION}`}
-              alt="SINERGIA NEGOTIUM"
+              alt="BioTap"
               width={32}
               height={32}
               unoptimized
             />
-            <span className="logo-text" style={{ fontSize: '1.25rem' }}>SINERGIA NEGOTIUM</span>
+            <span className="logo-text" style={{ fontSize: '1.5rem' }}>BioTap</span>
           </Link>
           <button
             className="mobile-sidebar-close"
@@ -133,8 +259,40 @@ export default function Navbar() {
         </div>
         <nav className="mobile-sidebar-nav">
           <ul>
+            <li className="mobile-nav-dropdown">
+              <button
+                type="button"
+                className="mobile-nav-link"
+                onClick={() => setProductDropdownOpen(!productDropdownOpen)}
+              >
+                {t('nav.product')}
+                <span className={`nav-dropdown-arrow ${productDropdownOpen ? 'open' : ''}`} aria-hidden>▾</span>
+              </button>
+              <ul className={`mobile-nav-dropdown-menu ${productDropdownOpen ? 'open' : ''}`}>
+                {PRODUCT_MENU_GROUPS.map((group) => (
+                  <li key={group.title} className="mobile-nav-dropdown-group">
+                    <div className="mobile-nav-dropdown-title">{group.title}</div>
+                    <div className="mobile-nav-dropdown-items">
+                      {group.items.map((item) => (
+                        <button
+                          key={item.label}
+                          type="button"
+                          className="mobile-nav-dropdown-item"
+                          onClick={() => handleProductMenuClick(item.sectionId)}
+                        >
+                          <span>{item.label}</span>
+                          <span className="material-icons" aria-hidden>
+                            chevron_right
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </li>
             {navLinks.map((link) => (
-              <li key={link.href}>
+              <li key={link.sectionId}>
                 <a
                   href={link.href}
                   className="mobile-nav-link"

@@ -28,15 +28,15 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!orgName || !fullName) {
+    if (!fullName) {
       return NextResponse.json(
-        { error: 'Organization name and full name are required' },
+        { error: 'Full name is required' },
         { status: 400 }
       );
     }
 
     const contactData: ContactFormData = {
-      orgName: orgName || '',
+      orgName: orgName || 'Not provided',
       industrySector: industrySector || '',
       orgType: orgType || '',
       country: country || '',
@@ -50,9 +50,9 @@ export async function POST(request: Request) {
       supportType: supportType || '',
     };
 
-    const recipientEmail = 'signup@sinergianegotium.com';
-    const fromEmail = process.env.SMTP_USER || 'signup@sinergianegotium.com';
-    const emailSubject = 'Procurement Consultation Request - Sinergia Negotium';
+    const recipientEmail = process.env.CONTACT_FORM_TO || 'contact@biotapapp.com';
+    const fromEmail = process.env.SMTP_USER || 'contact@biotapapp.com';
+    const emailSubject = 'New BioTap Contact Form Message';
     const emailHtml = getContactEmailTemplate(contactData);
 
     const emailResult = await sendEmailAdvanced({
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       from: fromEmail,
       replyTo: email,
       priority: 'high',
-      tags: ['contact', 'procurement-consultation'],
+      tags: ['contact', 'biotap-contact-form'],
     });
 
     if (!emailResult.success) {
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Your request has been submitted successfully. We will respond within 24–48 business hours.',
+        message: 'Your message has been submitted successfully. We will respond within 24–48 business hours.',
         messageId: emailResult.messageId,
       },
       { status: 200 }

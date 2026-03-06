@@ -10,7 +10,7 @@ const SCREENS = [
     description: 'BioTap enables secure payments anytime, anywhere—even without internet access.',
   },
   {
-    image: '/images/login.png',
+    image: '/images/Login.png',
     eyebrow: 'Biometric Login & Payment',
     title: 'One Touch Authentication',
     description: 'Secure access and authorize transactions instantly using your fingerprint or face.',

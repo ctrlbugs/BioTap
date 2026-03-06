@@ -1,7 +1,7 @@
 // Email templates for different purposes
 
 export function getSignupEmailTemplate(email: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || 'https://sinergianegotium.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || 'https://biotapapp.com';
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -76,7 +76,7 @@ export function getSignupEmailTemplate(email: string): string {
 }
 
 export function getNewsletterEmailTemplate(email: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || 'https://sinergianegotium.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || 'https://biotapapp.com';
   return `
 <!DOCTYPE html>
 <html lang="en">

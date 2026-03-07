@@ -6,7 +6,7 @@ const PRODUCTS = [
   { title: 'Card machines', image: '/images/pos.png' },
   { title: 'Point of sale', image: '/images/pos2.png' },
   { title: 'Offline Payment', image: '/images/pos.png' },
-  { title: 'Inventory Management', image: '/images/inventory.png' },
+  { title: 'Inventory Management', image: '/images/Inventory.png' },
 ];
 
 export default function ConnectedProducts() {

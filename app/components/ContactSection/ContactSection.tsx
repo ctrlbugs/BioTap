@@ -125,12 +125,12 @@ export default function ContactSection() {
             </div>
 
             <div className="contact-section-field">
-              <label htmlFor="contact-email">Work email</label>
+              <label htmlFor="contact-email">Email address</label>
               <input
                 id="contact-email"
                 name="email"
                 type="email"
-                placeholder="Enter your work email"
+                placeholder="Enter your email address"
                 required
                 className={errors.email ? 'contact-section-input-error' : ''}
               />

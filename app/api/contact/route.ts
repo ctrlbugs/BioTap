@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     const recipientEmail = process.env.CONTACT_FORM_TO || 'contact@biotapapp.com';
     const fromEmail = process.env.SMTP_USER || 'contact@biotapapp.com';
-    const emailSubject = 'New BioTap Contact Form Message';
+    const emailSubject = 'New Contact Form Submission';
     const emailHtml = getContactEmailTemplate(contactData);
 
     const emailResult = await sendEmailAdvanced({

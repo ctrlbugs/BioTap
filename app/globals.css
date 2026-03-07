@@ -6029,11 +6029,6 @@ body {
     letter-spacing: -0.01em;
 }
 
-.footer-brandline-year {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
-}
-
 .social-links {
     display: flex;
     gap: 1.35rem;
@@ -6059,12 +6054,25 @@ body {
 }
 
 .footer-locale {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.9rem;
+}
+
+.footer-locale-main {
     display: inline-flex;
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
-    color: rgba(255, 255, 255, 0.78);
-    font-size: 0.9rem;
+}
+
+.footer-locale-year {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .footer-locale-icon {
@@ -6096,6 +6104,7 @@ body {
     }
 
     .footer-locale {
+        align-items: center;
         justify-content: center;
     }
 }

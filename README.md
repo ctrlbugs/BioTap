@@ -38,4 +38,4 @@ This is a proprietary project. For changes, contact the development team.
 
 ## 📄 License
 
-Copyright © Sinergia Negotium. All rights reserved.
+Copyright © BioTap. All rights reserved.
